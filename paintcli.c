@@ -119,3 +119,145 @@ void paintcli_draw_line(uint32_t *pixels, size_t pixels_width, size_t pixels_hei
 }
 
 #endif // PAINTCLI_C_
+
+#define WIDTH 800
+#define HEIGHT 600
+
+#define COLS (8 * 2)
+#define ROWS (6 * 2)
+#define CELL_WIDTH (WIDTH / COLS)
+#define CELL_HEIGHT (HEIGHT / ROWS)
+
+#define BACKGROUND_COLOR 0xFF202020
+#define FOREGROUND_COLOR 0xFF2020FF
+
+static uint32_t pixels[WIDTH * HEIGHT];
+
+float lerpf(float a, float b, float t) {
+    return a + (b - a) * t;
+}
+
+bool checker_example(void) {
+    paintcli_fill(pixels, WIDTH, HEIGHT, BACKGROUND_COLOR);
+
+    for (int y = 0; y < ROWS; ++y) {
+        for (int x = 0; x < COLS; ++x) {
+            uint32_t color = BACKGROUND_COLOR;
+            if ((x + y) % 2 == 0) {
+                color = 0xFF2020FF;
+            }
+            paintcli_fill_rect(pixels, WIDTH, HEIGHT, x * CELL_WIDTH, y * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, color);
+        }
+    }
+
+    const char *file_path = "checker.ppm";
+    Errno err = paintcli_save_to_ppm_file(pixels, WIDTH, HEIGHT, file_path);
+    if (err) {
+        fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
+        return false;
+    }
+
+    return true;
+}
+
+bool circle_example(void) {
+    paintcli_fill(pixels, WIDTH, HEIGHT, BACKGROUND_COLOR);
+
+    for (int y = 0; y < ROWS; ++y) {
+        for (int x = 0; x < COLS; ++x) {
+            float u = (float)x / COLS;
+            float v = (float)y / ROWS;
+            float t = (u + v) / 2;
+
+            size_t radius = CELL_WIDTH;
+            if (CELL_HEIGHT < radius) radius = CELL_HEIGHT;
+
+            paintcli_fill_circle(pixels, WIDTH, HEIGHT,
+                x * CELL_WIDTH + CELL_WIDTH / 2, y * CELL_HEIGHT + CELL_HEIGHT / 2,
+                (size_t)lerpf(radius / 8, radius / 2, t),
+                FOREGROUND_COLOR);
+        }
+    }
+
+    const char *file_path = "circle.ppm";
+    Errno err = paintcli_save_to_ppm_file(pixels, WIDTH, HEIGHT, file_path);
+    if (err) {
+        fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
+        return false;
+    }
+    return true;
+}
+
+bool lines_example(void) {
+    paintcli_fill(pixels, WIDTH, HEIGHT, BACKGROUND_COLOR);
+
+    paintcli_draw_line(pixels, WIDTH, HEIGHT,
+        0, 0, WIDTH, HEIGHT,
+        FOREGROUND_COLOR);
+
+    paintcli_draw_line(pixels, WIDTH, HEIGHT,
+        WIDTH, 0, 0, HEIGHT,
+        FOREGROUND_COLOR);
+
+    paintcli_draw_line(pixels, WIDTH, HEIGHT,
+        0, 0, WIDTH / 4, HEIGHT,
+        0xFF20FF20);
+
+    paintcli_draw_line(pixels, WIDTH, HEIGHT,
+        WIDTH / 4, 0, 0, HEIGHT,
+        0xFF20FF20);
+
+    paintcli_draw_line(pixels, WIDTH, HEIGHT,
+        WIDTH, 0, WIDTH / 4 * 3, HEIGHT,
+        0xFF20FF20);
+
+    paintcli_draw_line(pixels, WIDTH, HEIGHT,
+        WIDTH / 4 * 3, 0, WIDTH, HEIGHT,
+        0xFF20FF20);
+
+    paintcli_draw_line(pixels, WIDTH, HEIGHT,
+        0, HEIGHT / 2, WIDTH, HEIGHT / 2,
+        0xFFFF3030);
+
+    paintcli_draw_line(pixels, WIDTH, HEIGHT,
+        WIDTH / 2, 0, WIDTH / 2, HEIGHT,
+        0xFFFF3030);
+
+    const char *file_path = "lines.ppm";
+    Errno err = paintcli_save_to_ppm_file(pixels, WIDTH, HEIGHT, file_path);
+    if (err) {
+        fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
+        return false;
+    }
+    return true;
+}
+
+bool brick_example(void) {
+    paintcli_fill(pixels, WIDTH, HEIGHT, 0xFF000000); // Black background
+
+    // Front face
+    paintcli_draw_line(pixels, WIDTH, HEIGHT, 200, 400, 400, 400, 0xFFFFFFFF); // White lines
+    paintcli_draw_line(pixels, WIDTH, HEIGHT, 400, 400, 400, 300, 0xFFFFFFFF);
+    paintcli_draw_line(pixels, WIDTH, HEIGHT, 400, 300, 200, 300, 0xFFFFFFFF);
+    paintcli_draw_line(pixels, WIDTH, HEIGHT, 200, 300, 200, 400, 0xFFFFFFFF);
+
+    // Top face
+    paintcli_draw_line(pixels, WIDTH, HEIGHT, 200, 300, 250, 250, 0xFFFFFFFF);
+    paintcli_draw_line(pixels, WIDTH, HEIGHT, 250, 250, 450, 250, 0xFFFFFFFF);
+
+    // Right face
+    paintcli_draw_line(pixels, WIDTH, HEIGHT, 400, 400, 450, 350, 0xFFFFFFFF);
+    paintcli_draw_line(pixels, WIDTH, HEIGHT, 450, 350, 450, 250, 0xFFFFFFFF);
+    paintcli_draw_line(pixels, WIDTH, HEIGHT, 450, 250, 400, 300, 0xFFFFFFFF);
+    paintcli_draw_line(pixels, WIDTH, HEIGHT, 400, 300, 400, 400, 0xFFFFFFFF);
+
+    const char *file_path = "brick.ppm";
+    Errno err = paintcli_save_to_ppm_file(pixels, WIDTH, HEIGHT, file_path);
+    if (err) {
+        fprintf(stderr, "ERROR: could not save file %s: %s\n", file_path, strerror(errno));
+        return false;
+    }
+
+    return true;
+}
+
