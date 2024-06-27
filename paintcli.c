@@ -261,3 +261,10 @@ bool brick_example(void) {
     return true;
 }
 
+int main(void) {
+    if (!checker_example()) return -1;
+    if (!circle_example()) return -1;
+    if (!lines_example()) return -1;
+    if (!brick_example()) return -1;
+    return 0;
+}
